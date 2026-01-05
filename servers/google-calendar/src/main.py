@@ -141,9 +141,14 @@ def book_appointment(
     """
     return _book_appointment_logic(attendee, time_utc, conversation_id, callSid, description)
 
+
+@mcp.tool()
+def say_hello():
+    return "Hello from google calendar mcp!"
+
 def main():
-    # mcp.run()
-    mcp.run(transport="http", port=8000)
+    mcp.run()
+    # mcp.run(transport="http", port=8000)
 
 if __name__ == "__main__":
     main()
