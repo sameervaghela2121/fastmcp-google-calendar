@@ -1,0 +1,339 @@
+[
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "FastMCP",
+        "importPath": "fastmcp",
+        "description": "fastmcp",
+        "isExtraImport": true,
+        "detail": "fastmcp",
+        "documentation": {}
+    },
+    {
+        "label": "setup_logger",
+        "importPath": "shared_utils",
+        "description": "shared_utils",
+        "isExtraImport": true,
+        "detail": "shared_utils",
+        "documentation": {}
+    },
+    {
+        "label": "httpx",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "httpx",
+        "description": "httpx",
+        "detail": "httpx",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "config",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "config",
+        "description": "config",
+        "detail": "config",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "importPath": "main",
+        "description": "main",
+        "isExtraImport": true,
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "asyncio",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "asyncio",
+        "description": "asyncio",
+        "detail": "asyncio",
+        "documentation": {}
+    },
+    {
+        "label": "_book_appointment_logic",
+        "importPath": "google_calendar.main",
+        "description": "google_calendar.main",
+        "isExtraImport": true,
+        "detail": "google_calendar.main",
+        "documentation": {}
+    },
+    {
+        "label": "_check_availability_logic",
+        "importPath": "google_calendar.main",
+        "description": "google_calendar.main",
+        "isExtraImport": true,
+        "detail": "google_calendar.main",
+        "documentation": {}
+    },
+    {
+        "label": "logging",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "logging",
+        "description": "logging",
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "subprocess",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "subprocess",
+        "description": "subprocess",
+        "detail": "subprocess",
+        "documentation": {}
+    },
+    {
+        "label": "DEFAULT_WEBHOOK_URL",
+        "kind": 5,
+        "importPath": "servers.google-calendar.src.config",
+        "description": "servers.google-calendar.src.config",
+        "peekOfCode": "DEFAULT_WEBHOOK_URL = \"https://vbe.alchemis.ai/webhook/c254fc1d-ff3b-40b8-b77e-da491bc55adb\"\n# Environment Variables\nWEBHOOK_URL = os.environ.get(\"GOOGLE_CALENDAR_WEBHOOK_URL\", DEFAULT_WEBHOOK_URL)\n# Constants\nWEBHOOK_TIMEOUT_SECONDS = 20.0",
+        "detail": "servers.google-calendar.src.config",
+        "documentation": {}
+    },
+    {
+        "label": "WEBHOOK_URL",
+        "kind": 5,
+        "importPath": "servers.google-calendar.src.config",
+        "description": "servers.google-calendar.src.config",
+        "peekOfCode": "WEBHOOK_URL = os.environ.get(\"GOOGLE_CALENDAR_WEBHOOK_URL\", DEFAULT_WEBHOOK_URL)\n# Constants\nWEBHOOK_TIMEOUT_SECONDS = 20.0",
+        "detail": "servers.google-calendar.src.config",
+        "documentation": {}
+    },
+    {
+        "label": "WEBHOOK_TIMEOUT_SECONDS",
+        "kind": 5,
+        "importPath": "servers.google-calendar.src.config",
+        "description": "servers.google-calendar.src.config",
+        "peekOfCode": "WEBHOOK_TIMEOUT_SECONDS = 20.0",
+        "detail": "servers.google-calendar.src.config",
+        "documentation": {}
+    },
+    {
+        "label": "check_availability",
+        "kind": 2,
+        "importPath": "servers.google-calendar.src.main",
+        "description": "servers.google-calendar.src.main",
+        "peekOfCode": "def check_availability(\n    start_date: str,\n    end_date: str,\n    conversation_id: str,\n    callSid: str,\n    proposed_time: Optional[str] = None\n) -> str:\n    \"\"\"\n    Check availability for a given time range.\n    Args:",
+        "detail": "servers.google-calendar.src.main",
+        "documentation": {}
+    },
+    {
+        "label": "book_appointment",
+        "kind": 2,
+        "importPath": "servers.google-calendar.src.main",
+        "description": "servers.google-calendar.src.main",
+        "peekOfCode": "def book_appointment(\n    attendee: Dict[str, Any],\n    time_utc: str,\n    conversation_id: str,\n    callSid: str,\n    description: Optional[str] = None\n) -> str:\n    \"\"\"\n    Use this tool to schedule a meeting or appointment for the user.\n    Only book a time that is available in the list returned by the `check_availability` tool.",
+        "detail": "servers.google-calendar.src.main",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "servers.google-calendar.src.main",
+        "description": "servers.google-calendar.src.main",
+        "peekOfCode": "def main():\n    # mcp.run()\n    mcp.run(transport=\"http\", port=8000)\nif __name__ == \"__main__\":\n    main()",
+        "detail": "servers.google-calendar.src.main",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "servers.google-calendar.src.main",
+        "description": "servers.google-calendar.src.main",
+        "peekOfCode": "logger = setup_logger(\"google-calendar-server\")\n# Create an MCP server\nmcp = FastMCP(\"Google Calendar\")\nimport httpx\nfrom datetime import datetime\nfrom typing import Optional, Dict, Any\nimport config\n# ... (setup_logger and mcp initialization remain)\ndef _check_availability_logic(\n    start_date: str,",
+        "detail": "servers.google-calendar.src.main",
+        "documentation": {}
+    },
+    {
+        "label": "mcp",
+        "kind": 5,
+        "importPath": "servers.google-calendar.src.main",
+        "description": "servers.google-calendar.src.main",
+        "peekOfCode": "mcp = FastMCP(\"Google Calendar\")\nimport httpx\nfrom datetime import datetime\nfrom typing import Optional, Dict, Any\nimport config\n# ... (setup_logger and mcp initialization remain)\ndef _check_availability_logic(\n    start_date: str,\n    end_date: str,\n    conversation_id: str,",
+        "detail": "servers.google-calendar.src.main",
+        "documentation": {}
+    },
+    {
+        "label": "current_dir",
+        "kind": 5,
+        "importPath": "servers.google-calendar.run",
+        "description": "servers.google-calendar.run",
+        "peekOfCode": "current_dir = Path(__file__).parent\nsrc_dir = current_dir / \"src\"\nsys.path.insert(0, str(src_dir))\n# Add shared utilities to Python path\nshared_src_dir = current_dir.parent.parent / \"shared\" / \"src\"\nsys.path.insert(0, str(shared_src_dir))\n# Check if running in virtual environment, if not try to activate it\nvenv_path = current_dir.parent.parent / \"venv\"\nif venv_path.exists() and \"VIRTUAL_ENV\" not in os.environ:\n    # Add virtual environment packages to path",
+        "detail": "servers.google-calendar.run",
+        "documentation": {}
+    },
+    {
+        "label": "src_dir",
+        "kind": 5,
+        "importPath": "servers.google-calendar.run",
+        "description": "servers.google-calendar.run",
+        "peekOfCode": "src_dir = current_dir / \"src\"\nsys.path.insert(0, str(src_dir))\n# Add shared utilities to Python path\nshared_src_dir = current_dir.parent.parent / \"shared\" / \"src\"\nsys.path.insert(0, str(shared_src_dir))\n# Check if running in virtual environment, if not try to activate it\nvenv_path = current_dir.parent.parent / \"venv\"\nif venv_path.exists() and \"VIRTUAL_ENV\" not in os.environ:\n    # Add virtual environment packages to path\n    venv_site_packages = venv_path / \"lib\" / \"python3.13\" / \"site-packages\"",
+        "detail": "servers.google-calendar.run",
+        "documentation": {}
+    },
+    {
+        "label": "shared_src_dir",
+        "kind": 5,
+        "importPath": "servers.google-calendar.run",
+        "description": "servers.google-calendar.run",
+        "peekOfCode": "shared_src_dir = current_dir.parent.parent / \"shared\" / \"src\"\nsys.path.insert(0, str(shared_src_dir))\n# Check if running in virtual environment, if not try to activate it\nvenv_path = current_dir.parent.parent / \"venv\"\nif venv_path.exists() and \"VIRTUAL_ENV\" not in os.environ:\n    # Add virtual environment packages to path\n    venv_site_packages = venv_path / \"lib\" / \"python3.13\" / \"site-packages\"\n    if venv_site_packages.exists():\n        sys.path.insert(0, str(venv_site_packages))\n# Import and run the main function",
+        "detail": "servers.google-calendar.run",
+        "documentation": {}
+    },
+    {
+        "label": "venv_path",
+        "kind": 5,
+        "importPath": "servers.google-calendar.run",
+        "description": "servers.google-calendar.run",
+        "peekOfCode": "venv_path = current_dir.parent.parent / \"venv\"\nif venv_path.exists() and \"VIRTUAL_ENV\" not in os.environ:\n    # Add virtual environment packages to path\n    venv_site_packages = venv_path / \"lib\" / \"python3.13\" / \"site-packages\"\n    if venv_site_packages.exists():\n        sys.path.insert(0, str(venv_site_packages))\n# Import and run the main function\nfrom main import main\nif __name__ == \"__main__\":\n    print(\"🚀 Starting Google Calendar MCP Server...\")",
+        "detail": "servers.google-calendar.run",
+        "documentation": {}
+    },
+    {
+        "label": "setup_logger",
+        "kind": 2,
+        "importPath": "shared.src.shared_utils.logger",
+        "description": "shared.src.shared_utils.logger",
+        "peekOfCode": "def setup_logger(name: str) -> logging.Logger:\n    \"\"\"\n    Sets up a simple logger with stdout handler.\n    \"\"\"\n    logger = logging.getLogger(name)\n    logger.setLevel(logging.INFO)\n    if not logger.handlers:\n        handler = logging.StreamHandler(sys.stdout)\n        formatter = logging.Formatter(\n            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'",
+        "detail": "shared.src.shared_utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "show_help",
+        "kind": 2,
+        "importPath": "run",
+        "description": "run",
+        "peekOfCode": "def show_help():\n    \"\"\"Display available servers and usage information.\"\"\"\n    print(\"🔧 Chime Labs MCP Servers\")\n    print(\"=\" * 50)\n    print(\"\\nAvailable servers:\")\n    for server_id, config in SERVERS.items():\n        print(f\"\\n📋 {server_id}\")\n        print(f\"   Name: {config['name']}\")\n        print(f\"   Description: {config['description']}\")\n        print(f\"   Path: {config['path']}\")",
+        "detail": "run",
+        "documentation": {}
+    },
+    {
+        "label": "run_server",
+        "kind": 2,
+        "importPath": "run",
+        "description": "run",
+        "peekOfCode": "def run_server(server_id: str):\n    \"\"\"Run the specified MCP server.\"\"\"\n    if server_id not in SERVERS:\n        print(f\"❌ Unknown server: {server_id}\")\n        print(f\"Available servers: {', '.join(SERVERS.keys())}\")\n        return False\n    server_config = SERVERS[server_id]\n    server_path = Path(__file__).parent / server_config[\"path\"]\n    run_script = server_path / server_config[\"script\"]\n    if not run_script.exists():",
+        "detail": "run",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "run",
+        "description": "run",
+        "peekOfCode": "def main():\n    \"\"\"Main entry point.\"\"\"\n    if len(sys.argv) < 2:\n        show_help()\n        return\n    server_id = sys.argv[1].lower()\n    if server_id in ['-h', '--help', 'help']:\n        show_help()\n        return\n    success = run_server(server_id)",
+        "detail": "run",
+        "documentation": {}
+    },
+    {
+        "label": "SERVERS",
+        "kind": 5,
+        "importPath": "run",
+        "description": "run",
+        "peekOfCode": "SERVERS = {\n    \"google-calendar\": {\n        \"name\": \"Google Calendar MCP Server\",\n        \"path\": \"servers/google-calendar\",\n        \"script\": \"run.py\",\n        \"description\": \"Calendar integration with availability checking and appointment booking\"\n    }\n}\ndef show_help():\n    \"\"\"Display available servers and usage information.\"\"\"",
+        "detail": "run",
+        "documentation": {}
+    },
+    {
+        "label": "run_mcp_with_logs",
+        "kind": 2,
+        "importPath": "run_with_logs",
+        "description": "run_with_logs",
+        "peekOfCode": "def run_mcp_with_logs():\n    \"\"\"Run the MCP server with enhanced logging output.\"\"\"\n    # Set up environment\n    current_dir = Path(__file__).parent\n    venv_python = current_dir / \"venv\" / \"bin\" / \"python\"\n    # Use virtual environment python if available\n    python_cmd = str(venv_python) if venv_python.exists() else \"python3\"\n    print(\"🚀 Starting Google Calendar MCP Server with Enhanced Logging\")\n    print(\"=\" * 60)\n    print(f\"📁 Working Directory: {current_dir}\")",
+        "detail": "run_with_logs",
+        "documentation": {}
+    }
+]

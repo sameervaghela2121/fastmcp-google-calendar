@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "google-calendar": {
+      "command": "/home/sam/Downloads/chimelabs_mcp_servers/venv/bin/python",
+      "args": [
+        "/home/sam/Downloads/chimelabs_mcp_servers/servers/google-calendar/run.py"
+      ],
+      "env": {
+        "GOOGLE_CALENDAR_WEBHOOK_URL": "https://vbe.alchemis.ai/webhook/c254fc1d-ff3b-40b8-b77e-da491bc55adb"
+      }
+    }
+  }
+}
