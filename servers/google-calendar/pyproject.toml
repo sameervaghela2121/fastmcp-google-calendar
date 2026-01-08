@@ -8,6 +8,7 @@ dependencies = [
     "fastmcp",
     "shared_utils",
     "httpx",
+    "supabase",
 ]
 
 [tool.uv.sources]

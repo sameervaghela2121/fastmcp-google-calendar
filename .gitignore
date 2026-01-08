@@ -93,3 +93,6 @@ dmypy.json
 
 # uv
 uv.lock
+.vscode
+.vscode/PythonImportHelper-v2-Completion.json
+.vscode/settings.json

@@ -1,5 +1,6 @@
 from fastmcp import FastMCP
 from shared_utils import setup_logger
+import asyncio
 
 # Initialize logger
 logger = setup_logger("google-calendar-server")
@@ -11,6 +12,7 @@ import httpx
 from datetime import datetime
 from typing import Optional, Dict, Any
 import config
+from database import initialize_database, cleanup_database
 
 # ... (setup_logger and mcp initialization remain)
 
@@ -146,9 +148,30 @@ def book_appointment(
 def say_hello():
     return "Hello from google calendar mcp!"
 
+async def startup():
+    """Initialize database connection on server startup."""
+    logger.info("Starting Google Calendar MCP server...")
+    success = await initialize_database()
+    if success:
+        logger.info("Database connection established successfully")
+    else:
+        logger.warning("Database connection failed - server will continue without database")
+
+async def shutdown():
+    """Clean up database connection on server shutdown."""
+    logger.info("Shutting down Google Calendar MCP server...")
+    await cleanup_database()
+
 def main():
-    mcp.run()
-    # mcp.run(transport="http", port=8000)
+    # Initialize database on startup
+    asyncio.run(startup())
+    
+    try:
+        mcp.run()
+        # mcp.run(transport="http", port=8000)
+    finally:
+        # Clean up on shutdown
+        asyncio.run(shutdown())
 
 if __name__ == "__main__":
     main()
