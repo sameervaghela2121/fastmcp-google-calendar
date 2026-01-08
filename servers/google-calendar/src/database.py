@@ -40,7 +40,6 @@ class SupabaseDatabase:
             
             # Create Supabase client
             client = create_client(supabase_url, supabase_key)
-            print(f"client {client}")
             self.client = client
             
             # Test connection by attempting a simple query
