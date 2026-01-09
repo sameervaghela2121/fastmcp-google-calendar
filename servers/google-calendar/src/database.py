@@ -7,6 +7,7 @@ import os
 import logging
 from typing import Dict, Any, Optional
 from supabase import create_client, Client
+from config import SUPABASE_URL, SUPABASE_ANON_KEY
 import asyncio
 from contextlib import asynccontextmanager
 
@@ -31,8 +32,8 @@ class SupabaseDatabase:
         """
         try:
             # Get Supabase credentials from environment
-            supabase_url = "https://qynvporcjcohuwcdikkk.supabase.co"
-            supabase_key = "sb_publishable_R81I2f03VxjNDFgP_llmhQ_fYeE1VqX"
+            supabase_url = SUPABASE_URL
+            supabase_key = SUPABASE_ANON_KEY
             
             if not supabase_url or not supabase_key:
                 logger.error("Missing Supabase credentials. Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables.")
@@ -61,7 +62,7 @@ class SupabaseDatabase:
         try:
             # Attempt to query a system table or perform a basic operation
             # This will raise an exception if connection fails
-            # result = self.client.table("users").select("count", count="exact").execute()
+            result = self.client.table("call_history").select("count", count="exact").execute()
             logger.debug("Database connection test successful")
         except Exception as e:
             logger.error(f"Database connection test failed: {str(e)}")
