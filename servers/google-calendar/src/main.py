@@ -19,16 +19,25 @@ async def _book_appointment_logic(
     call_sid: str,
 ) -> str:
     
+    print(f"DEBUG: _book_appointment_logic called with call_sid: {call_sid}")
+    
     if not call_sid:
         logger.warning("No call_sid found")
         call_sid = "unknown"
     
-    #Step 1: Fetch User Settings
+    # Step 1: Fetch User Settings
     try:
+        logger.info(f"_book_appointment_logic: Booking {call_sid}")
+        print(f"DEBUG: About to call get_booking_context_by_call_sid")
         user_settings = await get_booking_context_by_call_sid(call_sid)
+        print(f"DEBUG: get_booking_context_by_call_sid returned: {user_settings}")
 
     except Exception as context_error:
+        print(f"DEBUG: Exception in _book_appointment_logic: {str(context_error)}")
         logger.error(f"Error fetching booking context: {str(context_error)}, proceeding with basic payload")
+    
+    print(f"DEBUG: _book_appointment_logic completed")
+    return f"Booking logic completed for call_sid: {call_sid}"
 
 
 

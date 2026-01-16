@@ -11,8 +11,9 @@ from config import SUPABASE_URL, SUPABASE_ANON_KEY
 import asyncio
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from shared_utils import setup_logger
 
-logger = logging.getLogger(__name__)
+logger = setup_logger("google-calendar-database")
 
 
 class SupabaseDatabase:
@@ -33,8 +34,8 @@ class SupabaseDatabase:
         """
         try:
             # Get Supabase credentials from environment
-            supabase_url = SUPABASE_URL
-            supabase_key = SUPABASE_ANON_KEY
+            supabase_url = "https://iuvapamzexejwunsagoz.supabase.co"#SUPABASE_URL
+            supabase_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1dmFwYW16ZXhland1bnNhZ296Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5NTQwNTksImV4cCI6MjA3OTUzMDA1OX0.evTFszc9o5I9GbjK0betr7bibrXIoBhs66rmWfMNNhA"#SUPABASE_ANON_KEY
             
             if not supabase_url or not supabase_key:
                 logger.error("Missing Supabase credentials. Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables.")
@@ -154,26 +155,14 @@ def get_database() -> SupabaseDatabase:
     return db
 
 
-async def get_booking_context_by_callsid(callsid: str) -> Optional[Dict[str, Any]]:
+async def get_booking_context_by_call_sid(call_sid: str) -> Optional[Dict[str, Any]]:
     """
     Fetch comprehensive booking context data by Twilio callSid.
-    
-    This method executes a complex query that joins multiple tables to get:
-    - User settings (including calendar integration API key)
-    - Agent information
-    - Campaign details
-    - Contact information
-    - User profile
-    - Call history
-    - Booking settings
-    
-    Args:
-        callsid: The Twilio call SID to look up
-        
-    Returns:
-        Dict containing all the booking context data, or None if not found
     """
+    print(f"DEBUG: get_booking_context_by_call_sid called with call_sid: {call_sid}")
+    logger.info(f"get_booking_context_by_call_sid: Initiated for call_sid: {call_sid}")
     if not db.is_connected():
+        print(f"DEBUG: Database not connected")
         logger.error("Database not connected")
         return None
     
@@ -182,88 +171,24 @@ async def get_booking_context_by_callsid(callsid: str) -> Optional[Dict[str, Any
             # Use Supabase RPC to call a stored procedure that executes the complex query
             # First, let's try to call a stored procedure named 'get_booking_context'
             try:
-                result = client.rpc('get_booking_context', {'call_sid_param': callsid}).execute()
-                
+                logger.info(f"Calling RPC 'get_user_settings_by_callsid' with call_sid: {call_sid}")
+                result = client.rpc('get_user_settings_by_callsid', {'p_call_sid': call_sid}).execute()
+                logger.info(f"RPC result: {result}")
+
+                # Check if we got data back
                 if result.data and len(result.data) > 0:
-                    booking_context = result.data[0]
-                    logger.info(f"Successfully retrieved booking context for callSid: {callsid}")
-                    return booking_context
+                    logger.info(f"Found booking context data: {result.data[0]}")
+                    return result.data[0]  # Return the first record
                 else:
-                    logger.warning(f"No booking context found for callSid: {callsid}")
+                    logger.warning(f"No booking context found for call_sid: {call_sid}")
                     return None
                     
             except Exception as rpc_error:
                 logger.warning(f"RPC call failed, trying alternative approach: {str(rpc_error)}")
-                
-                # Alternative approach: Build the query step by step using Supabase's query builder
-                # This is a simplified version - you may need to adjust based on your exact schema
-                
-                # First, get the call history record
-                call_result = client.table('call_history').select('*').eq('twilio_callsid', callsid).execute()
-                
-                if not call_result.data:
-                    logger.warning(f"No call history found for callSid: {callsid}")
-                    return None
-                
-                call_data = call_result.data[0]
-                customer_id = call_data.get('customer_id')
-                campaign_id = call_data.get('campaign_id')
-                contact_id = call_data.get('contact_id')
-                
-                # Build the context by fetching related data
-                context = {
-                    'call_history': call_data
-                }
-                
-                # Get user settings
-                if customer_id:
-                    user_settings_result = client.table('user_settings').select('*').eq('user_id', customer_id).execute()
-                    if user_settings_result.data:
-                        user_settings = user_settings_result.data[0]
-                        context['user_settings'] = user_settings
-                        # Extract API key from cal_integration JSON field
-                        cal_integration = user_settings.get('cal_integration', {})
-                        if isinstance(cal_integration, dict):
-                            context['apiKey'] = cal_integration.get('apiKey')
-                
-                # Get campaign data
-                if campaign_id:
-                    campaign_result = client.table('campaigns').select('*').eq('id', campaign_id).execute()
-                    if campaign_result.data:
-                        context['campaign'] = campaign_result.data[0]
-                        
-                        # Get agent data
-                        agent_id = campaign_result.data[0].get('agent_id')
-                        if agent_id:
-                            agent_result = client.table('agents').select('*').eq('id', agent_id).execute()
-                            if agent_result.data:
-                                context['agent'] = agent_result.data[0]
-                
-                # Get user profile
-                if customer_id:
-                    profile_result = client.table('user_profiles').select('*').eq('user_id', customer_id).execute()
-                    if profile_result.data:
-                        user_profile = profile_result.data[0]
-                        context['user_profile'] = user_profile
-                        
-                        # Get company profile and booking settings
-                        company_profile_id = user_profile.get('company_profile_id')
-                        if company_profile_id:
-                            company_result = client.table('company_profiles').select('booking_settings').eq('id', company_profile_id).execute()
-                            if company_result.data:
-                                context['booking_settings'] = company_result.data[0].get('booking_settings')
-                
-                # Get contact data
-                if contact_id:
-                    contact_result = client.table('campaign_contacts').select('*').eq('id', contact_id).execute()
-                    if contact_result.data:
-                        context['contact'] = contact_result.data[0]
-                
-                logger.info(f"Successfully retrieved booking context for callSid: {callsid} using fallback method")
-                return context
+                return None
                 
     except Exception as e:
-        logger.error(f"Error fetching booking context for callSid {callsid}: {str(e)}")
+        logger.error(f"Error fetching booking context for callSid {call_sid}: {str(e)}")
         return None
 
 
