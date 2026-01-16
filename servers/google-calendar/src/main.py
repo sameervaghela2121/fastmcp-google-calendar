@@ -1,4 +1,5 @@
 from fastmcp import FastMCP
+from fastmcp.server.dependencies import get_http_headers
 from shared_utils import setup_logger
 import asyncio
 
@@ -20,9 +21,15 @@ def _check_availability_logic(
     start_date: str,
     end_date: str,
     conversation_id: str,
-    callSid: str,
     proposed_time: Optional[str] = None
 ) -> str:
+    # Extract callSid from headers
+    headers = get_http_headers()
+    callSid = headers.get("x-twilio-callsid") or headers.get("callsid") or headers.get("Call-SID")
+    
+    if not callSid:
+        logger.warning("No callSid found in headers")
+        callSid = "unknown"
     params = {
         "start_date": start_date,
         "end_date": end_date,
@@ -57,7 +64,6 @@ def check_availability(
     start_date: str,
     end_date: str,
     conversation_id: str,
-    callSid: str,
     proposed_time: Optional[str] = None
 ) -> str:
     """
@@ -68,18 +74,26 @@ def check_availability(
         end_date: Resolved end date/time in ISO 8601 extended format with timezone offset. 
                   Typically start_date + 7 days (or 6 weeks if specific date provided).
         conversation_id: Dynamic Variable system__conversation_id
-        callSid: Dynamic Variable callSid
         proposed_time: Specific time proposed by user in ISO 8601 extended format (optional).
+    
+    Note: callSid is automatically extracted from HTTP headers (x-twilio-callsid, callsid, or Call-SID).
     """
-    return _check_availability_logic(start_date, end_date, conversation_id, callSid, proposed_time)
+    return _check_availability_logic(start_date, end_date, conversation_id, proposed_time)
 
 def _book_appointment_logic(
     attendee: Dict[str, Any],
     time_utc: str,
     conversation_id: str,
-    callSid: str,
     description: Optional[str] = None
 ) -> str:
+    # Extract callSid from headers
+    headers = get_http_headers()
+    callSid = headers.get("x-twilio-callsid") or headers.get("callsid") or headers.get("Call-SID")
+    
+    if not callSid:
+        logger.warning("No callSid found in headers")
+        callSid = "unknown"
+    
     # First, fetch booking context data using the callSid
     try:
         booking_context = asyncio.run(get_booking_context_by_callsid(callSid))
@@ -201,7 +215,6 @@ def book_appointment(
     attendee: Dict[str, Any],
     time_utc: str,
     conversation_id: str,
-    callSid: str,
     description: Optional[str] = None
 ) -> str:
     """
@@ -222,10 +235,11 @@ def book_appointment(
             - email (optional): RFC 5322 format
         time_utc: Resolved date and time in the user's timezone, ISO 8601 extended format.
         conversation_id: Dynamic Variable system__conversation_id
-        callSid: Dynamic Variable callSid
         description: description of the appointment
+    
+    Note: callSid is automatically extracted from HTTP headers (x-twilio-callsid, callsid, or Call-SID).
     """
-    return _book_appointment_logic(attendee, time_utc, conversation_id, callSid, description)
+    return _book_appointment_logic(attendee, time_utc, conversation_id, description)
 
 
 @mcp.tool()
@@ -251,8 +265,8 @@ def main():
     asyncio.run(startup())
     
     try:
-        mcp.run()
-        # mcp.run(transport="http", port=8000)
+        # mcp.run()
+        mcp.run(transport="http", port=8000)
     finally:
         # Clean up on shutdown
         asyncio.run(shutdown())
