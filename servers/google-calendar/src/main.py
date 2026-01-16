@@ -12,7 +12,7 @@ import httpx
 from datetime import datetime
 from typing import Optional, Dict, Any
 import config
-from database import initialize_database, cleanup_database
+from database import initialize_database, cleanup_database, get_booking_context_by_callsid, validate_and_refresh_gcal_token, create_google_calendar_event
 
 # ... (setup_logger and mcp initialization remain)
 
@@ -80,11 +80,95 @@ def _book_appointment_logic(
     callSid: str,
     description: Optional[str] = None
 ) -> str:
-    payload = {
-        "Description": description or f"Appointment for {attendee.get('first_name')} {attendee.get('last_name')}",
-        "attendee": attendee,
-        "time_utc": time_utc
-    }
+    # First, fetch booking context data using the callSid
+    try:
+        booking_context = asyncio.run(get_booking_context_by_callsid(callSid))
+        
+        if booking_context:
+            logger.info(f"Retrieved booking context for callSid: {callSid}")
+            
+            # Extract relevant information from booking context
+            api_key = booking_context.get('apiKey')
+            user_settings = booking_context.get('user_settings', {})
+            agent_info = booking_context.get('agent', {})
+            campaign_info = booking_context.get('campaign', {})
+            contact_info = booking_context.get('contact', {})
+            user_profile = booking_context.get('user_profile', {})
+            booking_settings = booking_context.get('booking_settings', {})
+            
+            # Log the retrieved context for debugging
+            logger.debug(f"Booking context - API Key: {'***' if api_key else 'None'}")
+            logger.debug(f"User settings: {user_settings.get('user_id') if user_settings else 'None'}")
+            logger.debug(f"Agent: {agent_info.get('name') if agent_info else 'None'}")
+            logger.debug(f"Campaign: {campaign_info.get('name') if campaign_info else 'None'}")
+            
+            # Validate and refresh Google Calendar token if needed
+            gcal_token_data = None
+            gcal_event_result = None
+            if user_settings:
+                user_id = user_settings.get('user_id')
+                if user_id:
+                    try:
+                        gcal_token_data = asyncio.run(validate_and_refresh_gcal_token(user_id, user_settings))
+                        if gcal_token_data:
+                            logger.info(f"Google Calendar token validated for user {user_id}")
+                            
+                            # Book the event directly in Google Calendar
+                            try:
+                                gcal_event_result = asyncio.run(create_google_calendar_event(
+                                    token_data=gcal_token_data,
+                                    attendee=attendee,
+                                    time_utc=time_utc,
+                                    description=description,
+                                    duration_minutes=60  # Default 1 hour appointment
+                                ))
+                                
+                                if gcal_event_result:
+                                    logger.info(f"Successfully created Google Calendar event: {gcal_event_result.get('event_id')}")
+                                else:
+                                    logger.warning(f"Failed to create Google Calendar event for user {user_id}")
+                                    
+                            except Exception as booking_error:
+                                logger.error(f"Error creating Google Calendar event: {str(booking_error)}")
+                        else:
+                            logger.warning(f"Google Calendar token validation failed for user {user_id}")
+                    except Exception as token_error:
+                        logger.error(f"Error validating Google Calendar token: {str(token_error)}")
+            
+            # Enhance the payload with context data and token information
+            enhanced_payload = {
+                "Description": description or f"Appointment for {attendee.get('first_name')} {attendee.get('last_name')}",
+                "attendee": attendee,
+                "time_utc": time_utc,
+                "booking_context": {
+                    "api_key": api_key,
+                    "user_settings": user_settings,
+                    "agent": agent_info,
+                    "campaign": campaign_info,
+                    "contact": contact_info,
+                    "user_profile": user_profile,
+                    "booking_settings": booking_settings,
+                    "gcal_token_data": gcal_token_data,
+                    "gcal_event_result": gcal_event_result
+                }
+            }
+            
+            payload = enhanced_payload
+        else:
+            logger.warning(f"No booking context found for callSid: {callSid}, proceeding with basic payload")
+            payload = {
+                "Description": description or f"Appointment for {attendee.get('first_name')} {attendee.get('last_name')}",
+                "attendee": attendee,
+                "time_utc": time_utc
+            }
+            
+    except Exception as context_error:
+        logger.error(f"Error fetching booking context: {str(context_error)}, proceeding with basic payload")
+        payload = {
+            "Description": description or f"Appointment for {attendee.get('first_name')} {attendee.get('last_name')}",
+            "attendee": attendee,
+            "time_utc": time_utc
+        }
     
     params = {
         "conversation_id": conversation_id,
