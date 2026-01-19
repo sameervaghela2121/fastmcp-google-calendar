@@ -12,15 +12,15 @@ mcp = FastMCP("Google Calendar")
 import httpx
 from datetime import datetime
 from typing import Optional, Dict, Any
-import config
-from database import (
+from shared_utils import (
+    get_shared_config,
     initialize_database, 
     cleanup_database, 
-    get_booking_context_by_call_sid, 
-    validate_and_refresh_gcal_token, 
-    create_google_calendar_event,
+    get_booking_context_by_call_sid,
     store_event_booking,
-    update_call_history_booking
+    update_call_history_booking,
+    validate_and_refresh_gcal_token,
+    create_google_calendar_event
 )
 
 async def _book_appointment_logic(

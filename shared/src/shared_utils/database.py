@@ -1,48 +1,70 @@
 """
-Database module for Google Calendar MCP server with Supabase integration.
-Provides connection management and basic database operations.
+Shared database module for MCP servers with Supabase integration.
+Provides connection management and basic database operations that can be reused across multiple servers.
 """
 
 import os
 import logging
 from typing import Dict, Any, Optional
 from supabase import create_client, Client
-from config import SUPABASE_URL, SUPABASE_ANON_KEY
 import asyncio
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from shared_utils import setup_logger
+from .logger import setup_logger
 
-logger = setup_logger("google-calendar-database")
+logger = setup_logger("shared-database")
 
 
 class SupabaseDatabase:
     """
     Supabase database connection and operations manager.
+    Singleton pattern to ensure single connection across all MCP servers.
     """
     
+    _instance = None
+    _initialized = False
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(SupabaseDatabase, cls).__new__(cls)
+        return cls._instance
+    
     def __init__(self):
-        self.client: Optional[Client] = None
-        self._connected = False
+        if not self._initialized:
+            self.client: Optional[Client] = None
+            self._connected = False
+            self._supabase_url = None
+            self._supabase_key = None
+            SupabaseDatabase._initialized = True
         
-    def connect(self) -> bool:
+    def connect(self, supabase_url: str = None, supabase_key: str = None) -> bool:
         """
         Establish connection to Supabase database.
+        
+        Args:
+            supabase_url: Supabase URL (optional, will use env var if not provided)
+            supabase_key: Supabase anon key (optional, will use env var if not provided)
         
         Returns:
             bool: True if connection successful, False otherwise
         """
         try:
-            # Get Supabase credentials from environment
-            supabase_url = SUPABASE_URL
-            supabase_key = SUPABASE_ANON_KEY
-            
+            # Use provided credentials or fall back to shared config
             if not supabase_url or not supabase_key:
-                logger.error("Missing Supabase credentials. Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables.")
+                from .config import get_shared_config
+                config = get_shared_config()
+                self._supabase_url = supabase_url or config.SUPABASE_URL
+                self._supabase_key = supabase_key or config.SUPABASE_ANON_KEY
+            else:
+                self._supabase_url = supabase_url
+                self._supabase_key = supabase_key
+            
+            if not self._supabase_url or not self._supabase_key:
+                logger.error("Missing Supabase credentials. Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables or provide them as parameters.")
                 return False
             
             # Create Supabase client
-            client = create_client(supabase_url, supabase_key)
+            client = create_client(self._supabase_url, self._supabase_key)
             self.client = client
             
             # Test connection by attempting a simple query
@@ -111,26 +133,51 @@ class SupabaseDatabase:
             pass
 
 
-# Global database instance
-db = SupabaseDatabase()
+# Global database instance (singleton)
+_db_instance = None
 
 
-async def initialize_database() -> bool:
+def get_database() -> SupabaseDatabase:
     """
-    Initialize the database connection.
+    Get the global database instance (singleton pattern).
+    
+    Returns:
+        SupabaseDatabase: The database instance
+    """
+    global _db_instance
+    if _db_instance is None:
+        _db_instance = SupabaseDatabase()
+    return _db_instance
+
+
+async def initialize_database(supabase_url: str = None, supabase_key: str = None) -> bool:
+    """
+    Initialize the shared database connection.
+    
+    Args:
+        supabase_url: Supabase URL (optional, will use shared config if not provided)
+        supabase_key: Supabase anon key (optional, will use shared config if not provided)
     
     Returns:
         bool: True if initialization successful, False otherwise
     """
     try:
-        success = db.connect()
+        # If no credentials provided, get them from shared config
+        if not supabase_url or not supabase_key:
+            from .config import get_shared_config
+            config = get_shared_config()
+            supabase_url = supabase_url or config.SUPABASE_URL
+            supabase_key = supabase_key or config.SUPABASE_ANON_KEY
+        
+        db = get_database()
+        success = db.connect(supabase_url, supabase_key)
         if success:
-            logger.info("Database initialized successfully")
+            logger.info("Shared database initialized successfully")
         else:
-            logger.error("Database initialization failed")
+            logger.error("Shared database initialization failed")
         return success
     except Exception as e:
-        logger.error(f"Database initialization error: {str(e)}")
+        logger.error(f"Shared database initialization error: {str(e)}")
         return False
 
 
@@ -139,20 +186,11 @@ async def cleanup_database():
     Clean up database connections.
     """
     try:
+        db = get_database()
         db.disconnect()
-        logger.info("Database cleanup completed")
+        logger.info("Shared database cleanup completed")
     except Exception as e:
-        logger.error(f"Database cleanup error: {str(e)}")
-
-
-def get_database() -> SupabaseDatabase:
-    """
-    Get the global database instance.
-    
-    Returns:
-        SupabaseDatabase: The database instance
-    """
-    return db
+        logger.error(f"Shared database cleanup error: {str(e)}")
 
 
 async def get_booking_context_by_call_sid(call_sid: str) -> Optional[Dict[str, Any]]:
@@ -160,10 +198,10 @@ async def get_booking_context_by_call_sid(call_sid: str) -> Optional[Dict[str, A
     Fetch comprehensive booking context data by Twilio callSid.
     Returns a dictionary with user_settings, agent, campaign, contact, user_profile, call_history, and booking_settings.
     """
-    print(f"DEBUG: get_booking_context_by_call_sid called with call_sid: {call_sid}")
     logger.info(f"get_booking_context_by_call_sid: Initiated for call_sid: {call_sid}")
+    db = get_database()
+    
     if not db.is_connected():
-        print(f"DEBUG: Database not connected")
         logger.error("Database not connected")
         return None
     
@@ -203,6 +241,7 @@ async def validate_and_refresh_gcal_token(user_id: str, user_settings: Dict[str,
     Returns:
         Dict containing valid token data, or None if validation/refresh fails
     """
+    db = get_database()
     if not db.is_connected():
         logger.error("Database not connected")
         return None
@@ -279,11 +318,13 @@ async def refresh_google_calendar_token(refresh_token: str) -> Optional[Dict[str
         Dict containing new token data, or None if refresh fails
     """
     import httpx
-    from config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+    from .config import get_shared_config
     
     try:
+        config = get_shared_config()
+        
         # Check if required OAuth credentials are available
-        if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+        if not config.GOOGLE_CLIENT_ID or not config.GOOGLE_CLIENT_SECRET:
             logger.error("Missing Google OAuth credentials (GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET)")
             return None
         
@@ -291,8 +332,8 @@ async def refresh_google_calendar_token(refresh_token: str) -> Optional[Dict[str
         token_url = "https://oauth2.googleapis.com/token"
         
         data = {
-            'client_id': GOOGLE_CLIENT_ID,
-            'client_secret': GOOGLE_CLIENT_SECRET,
+            'client_id': config.GOOGLE_CLIENT_ID,
+            'client_secret': config.GOOGLE_CLIENT_SECRET,
             'refresh_token': refresh_token,
             'grant_type': 'refresh_token'
         }
@@ -340,6 +381,7 @@ async def update_gcal_credentials(user_id: str, token_data: Dict[str, Any]) -> b
     Returns:
         True if update successful, False otherwise
     """
+    db = get_database()
     if not db.is_connected():
         logger.error("Database not connected")
         return False
@@ -489,6 +531,47 @@ async def create_google_calendar_event(
         return None
 
 
+async def update_call_history_booking(
+    call_sid: str,
+    event_booking_id: str
+) -> bool:
+    """
+    Update call_history with booking outcome.
+    
+    Args:
+        call_sid: Twilio call SID
+        event_booking_id: Event booking ID from event_bookings table
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    db = get_database()
+    
+    if not db.is_connected():
+        logger.error("Database not connected")
+        return False
+    
+    try:
+        async with db.get_connection() as client:
+            update_data = {
+                'call_outcome': 'Booked',
+                'event_booking_id': event_booking_id
+            }
+            
+            result = client.table('call_history').update(update_data).eq('twilio_callsid', call_sid).execute()
+            
+            if result.data:
+                logger.info(f"Successfully updated call_history for call_sid: {call_sid}")
+                return True
+            else:
+                logger.error(f"Failed to update call_history for call_sid: {call_sid}")
+                return False
+                
+    except Exception as e:
+        logger.error(f"Error updating call_history: {str(e)}")
+        return False
+
+
 async def store_event_booking(
     user_id: str,
     contact_id: Optional[str],
@@ -507,6 +590,8 @@ async def store_event_booking(
     Returns:
         Booking ID if successful, None if failed
     """
+    db = get_database()
+    
     if not db.is_connected():
         logger.error("Database not connected")
         return None
@@ -541,42 +626,3 @@ async def store_event_booking(
     except Exception as e:
         logger.error(f"Error storing event booking: {str(e)}")
         return None
-
-
-async def update_call_history_booking(
-    call_sid: str,
-    event_booking_id: str
-) -> bool:
-    """
-    Update call_history with booking outcome.
-    
-    Args:
-        call_sid: Twilio call SID
-        event_booking_id: Event booking ID from event_bookings table
-        
-    Returns:
-        True if successful, False otherwise
-    """
-    if not db.is_connected():
-        logger.error("Database not connected")
-        return False
-    
-    try:
-        async with db.get_connection() as client:
-            update_data = {
-                'call_outcome': 'Booked',
-                'event_booking_id': event_booking_id
-            }
-            
-            result = client.table('call_history').update(update_data).eq('twilio_callsid', call_sid).execute()
-            
-            if result.data:
-                logger.info(f"Successfully updated call_history for call_sid: {call_sid}")
-                return True
-            else:
-                logger.error(f"Failed to update call_history for call_sid: {call_sid}")
-                return False
-                
-    except Exception as e:
-        logger.error(f"Error updating call_history: {str(e)}")
-        return False
