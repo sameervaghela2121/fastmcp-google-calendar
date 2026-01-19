@@ -37,9 +37,6 @@ class SupabaseDatabase:
             supabase_url = SUPABASE_URL
             supabase_key = SUPABASE_ANON_KEY
             
-            logger.info(f"\n\n supabase_url {supabase_url}\n\n")
-            logger.info(f"\n\n supabase_key {supabase_key}\n\n")
-            
             if not supabase_url or not supabase_key:
                 logger.error("Missing Supabase credentials. Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables.")
                 return False
