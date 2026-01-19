@@ -25,3 +25,4 @@ pytest-httpx>=0.21.0
 responses>=0.23.0
 supabase
 python-dotenv>=1.0.0
+pytz>=2023.3

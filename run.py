@@ -21,6 +21,12 @@ SERVERS = {
         "path": "servers/google-calendar",
         "script": "run.py",
         "description": "Calendar integration with availability checking and appointment booking"
+    },
+    "service-m8": {
+        "name": "Service M8 MCP Server",
+        "path": "servers/service-m8",
+        "script": "run.py",
+        "description": "Service M8 integration with availability checking and appointment booking"
     }
 }
 
