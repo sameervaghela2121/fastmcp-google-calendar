@@ -34,8 +34,11 @@ class SupabaseDatabase:
         """
         try:
             # Get Supabase credentials from environment
-            supabase_url = "https://harqcusfrwbxwylclicl.supabase.co"#SUPABASE_URL
-            supabase_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhcnFjdXNmcndieHd5bGNsaWNsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczOTE0NTM1NiwiZXhwIjoyMDU0NzIxMzU2fQ.zGXhOrz2cRMsoGU5QHhDycok-77N7OKYj1uQ5mAjYN4"#SUPABASE_ANON_KEY
+            supabase_url = SUPABASE_URL
+            supabase_key = SUPABASE_ANON_KEY
+            
+            logger.info(f"\n\n supabase_url {supabase_url}\n\n")
+            logger.info(f"\n\n supabase_key {supabase_key}\n\n")
             
             if not supabase_url or not supabase_key:
                 logger.error("Missing Supabase credentials. Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables.")
