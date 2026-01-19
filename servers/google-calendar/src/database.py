@@ -235,7 +235,8 @@ async def validate_and_refresh_gcal_token(user_id: str, user_settings: Dict[str,
         import dateutil.parser
         
         created_time = dateutil.parser.parse(created_at)
-        expiration_time = created_time.timestamp() + (expires_in - 120)
+        expires_in_seconds = int(expires_in)  # Convert to int in case it's a string
+        expiration_time = created_time.timestamp() + (expires_in_seconds - 120)
         current_time = datetime.now(timezone.utc).timestamp()
         
         if current_time < expiration_time:
@@ -281,6 +282,11 @@ async def refresh_google_calendar_token(refresh_token: str) -> Optional[Dict[str
     from config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
     
     try:
+        # Check if required OAuth credentials are available
+        if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+            logger.error("Missing Google OAuth credentials (GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET)")
+            return None
+        
         # Google OAuth2 token refresh endpoint
         token_url = "https://oauth2.googleapis.com/token"
         
@@ -293,9 +299,20 @@ async def refresh_google_calendar_token(refresh_token: str) -> Optional[Dict[str
         
         async with httpx.AsyncClient() as client:
             response = await client.post(token_url, data=data)
-            response.raise_for_status()
+            
+            if response.status_code != 200:
+                # Log detailed error information
+                try:
+                    error_data = response.json()
+                    logger.error(f"Google OAuth error: {error_data}")
+                except:
+                    logger.error(f"Google OAuth error: {response.status_code} - {response.text}")
+                response.raise_for_status()
             
             token_data = response.json()
+            
+            # Add created_at timestamp for expiration calculation
+            from datetime import datetime, timezone
             
             # Return the new token data
             return {
@@ -303,7 +320,8 @@ async def refresh_google_calendar_token(refresh_token: str) -> Optional[Dict[str
                 'refresh_token': refresh_token,  # Refresh token usually stays the same
                 'expires_in': token_data.get('expires_in', 3600),
                 'scope': token_data.get('scope', ''),
-                'token_type': token_data.get('token_type', 'Bearer')
+                'token_type': token_data.get('token_type', 'Bearer'),
+                'created_at': datetime.now(timezone.utc).isoformat()
             }
             
     except Exception as e:
